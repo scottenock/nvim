@@ -1,20 +1,18 @@
 local options = {
   formatters_by_ft = {
     lua = { "stylua" },
-    go = { "gofumpt", "goimports-reviser", "golines" },
+    go = { "gofumpt" },
     markdown = { "prettier" },
     css = { "prettier" },
     html = { "prettier" },
+    javascript = { "prettier", stop_after_first = true },
+    javascriptreact = { "prettier", stop_after_first = true },
+    typescriptreact = { "eslint", "prettier", stop_after_first = true },
+    graphql = { "prettier", stop_after_first = true },
+    json = { "prettier" },
   },
 
-  formatters = {
-    ["goimports-reviser"] = {
-      prepend_args = { "-rm-unused" },
-    },
-    golines = {
-      prepend_args = { "--max-len=120" },
-    },
-  },
+  formatters = {},
 
   format_on_save = {
     timeout_ms = 500,
