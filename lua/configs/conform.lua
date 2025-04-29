@@ -7,7 +7,7 @@ local options = {
     html = { "prettier" },
     javascript = { "prettier", stop_after_first = true },
     javascriptreact = { "prettier", stop_after_first = true },
-    typescriptreact = { "eslint", "prettier", stop_after_first = true },
+    typescriptreact = { "prettier", stop_after_first = true },
     graphql = { "prettier", stop_after_first = true },
     json = { "prettier" },
   },
@@ -15,7 +15,7 @@ local options = {
   formatters = {},
 
   format_on_save = {
-    timeout_ms = 500,
+    timeout_ms = 1500,
     lsp_fallback = true,
   },
 }
