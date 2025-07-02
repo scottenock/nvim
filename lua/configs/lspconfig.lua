@@ -7,21 +7,25 @@ local lspconfig = require "lspconfig"
 local servers = { "html", "eslint", "tailwindcss", "emmet_language_server", "cssls", "terraformls", "phpactor" }
 local nvlsp = require "nvchad.configs.lspconfig"
 
+local function custom_on_attach(client, bufnr)
+  if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+    client.server_capabilities.documentFormattingProvider = false
+    client.server_capabilities.documentRangeFormattingProvider = false
+  end
+  nvlsp.on_attach(client, bufnr)
+end
+
 -- lsps with default config
 for _, lsp in ipairs(servers) do
   lspconfig[lsp].setup {
-    on_attach = nvlsp.on_attach,
+    on_attach = custom_on_attach,
     on_init = nvlsp.on_init,
     capabilities = nvlsp.capabilities,
   }
 end
 
 lspconfig.gopls.setup {
-  on_attach = function(client, bufnr)
-    client.server_capabilities.documentFormattingProvider = false
-    client.server_capabilities.documentRangeFormattingProvider = false
-    nvlsp.on_attach(client, bufnr)
-  end,
+  on_attach = custom_on_attach,
   on_init = nvlsp.on_init,
   capabilities = nvlsp.capabilities,
   cmd = { "gopls" },
