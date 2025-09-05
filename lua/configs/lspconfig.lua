@@ -3,15 +3,17 @@ require("nvchad.configs.lspconfig").defaults()
 
 local lspconfig = require "lspconfig"
 
--- EXAMPLE
 local servers = { "html", "eslint", "tailwindcss", "emmet_language_server", "cssls", "terraformls", "phpactor" }
 local nvlsp = require "nvchad.configs.lspconfig"
 
+-- check for custom autoformat flag and disable documenting formatting if true
+-- useful for disabling formatting for a file
 local function custom_on_attach(client, bufnr)
   if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
     client.server_capabilities.documentFormattingProvider = false
     client.server_capabilities.documentRangeFormattingProvider = false
   end
+
   nvlsp.on_attach(client, bufnr)
 end
 
