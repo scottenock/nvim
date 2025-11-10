@@ -74,4 +74,5 @@ return {
     lazy = false,
     dependencies = { "nvim-treesitter/nvim-treesitter" },
   },
+
 }

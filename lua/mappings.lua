@@ -11,6 +11,7 @@ map("n", "<leader>zz", ":ClearBuffers<CR>", { noremap = true })
 map("n", "<leader>ef", ":EslintFixAll<CR>", { noremap = true })
 map("x", "<leader>p", '"_dP', { noremap = true, desc = "Paste without overwriting yank" })
 
+map("v", "<leader>s", [[:sort<CR>]], { desc = "Sort selected lines" })
 -- map({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
 
 vim.api.nvim_create_user_command("FormatDisable", function(args)
