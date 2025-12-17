@@ -4,6 +4,17 @@ require "nvchad.mappings"
 
 local map = vim.keymap.set
 
+
+map("n", "]d", function()
+  vim.diagnostic.jump({ count = 1, float = true })
+end, { desc = "Go to next diagnostic" })
+
+map("n", "[d", function()
+  vim.diagnostic.jump({ count = -1, float = true })
+end, { desc = "Go to previous diagnostic" })
+
+
+map("n", ";", ":", { desc = "CMD enter command mode" })
 map("i", "jk", "<ESC>")
 
 vim.api.nvim_create_user_command("ClearBuffers", "bufdo if !&modified | bdelete | endif", {})
@@ -57,3 +68,11 @@ end, {
 
 -- Optional mapping
 map("n", "<leader>rac", ":ReplaceAllCase<CR>", { noremap = true, desc = "Replace all with case variants" })
+
+-- map({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
+--
+--
+--
+vim.api.nvim_create_user_command("GoSortFuncs", function()
+  require("custom.go_sort").sort_functions()
+end, {})

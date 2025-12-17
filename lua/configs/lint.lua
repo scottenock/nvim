@@ -1,58 +1,40 @@
 local lint = require("lint")
 
--- Define a proper golangci-lint integration
-lint.linters.golangcilint = {
-  cmd = "golangci-lint",
-  stdin = false,
-  append_fname = false,
-  args = {
-    "run",
-    "--out-format", "json",
-    "--path-prefix", vim.fn.getcwd(),
-  },
-  ignore_exitcode = true,
-  parser = function(output, _)
-    local ok, decoded = pcall(vim.json.decode, output)
-    if not ok or not decoded or not decoded.Issues then
-      return {}
-    end
-
-    local diagnostics = {}
-    for _, issue in ipairs(decoded.Issues) do
-      table.insert(diagnostics, {
-        lnum = issue.Pos.Line - 1,
-        col = issue.Pos.Column - 1,
-        end_lnum = issue.Pos.EndLine and issue.Pos.EndLine - 1 or issue.Pos.Line - 1,
-        end_col = issue.Pos.EndColumn or issue.Pos.Column,
-        severity = vim.diagnostic.severity.WARN,
-        source = "golangci-lint",
-        message = string.format("[%s] %s", issue.FromLinter, issue.Text),
-      })
-    end
-    return diagnostics
-  end,
-}
-
 lint.linters_by_ft = {
   go = { "golangcilint" },
   terraform = { "tflint" },
 }
 
--- Auto-run lint on common events
 vim.api.nvim_create_autocmd({ "BufWritePost", "InsertLeave" }, {
   callback = function()
-    local ft = vim.bo.filetype
-    if lint.linters_by_ft[ft] then
-      lint.try_lint()
-    end
+    require("lint").try_lint()
   end,
 })
 
--- Manual trigger (leader + li)
+-- Manual trigger
 vim.keymap.set("n", "<leader>li", function()
   lint.try_lint()
-end, { desc = "Trigger linting for current file" })
+end, { desc = "Trigger linting" })
 
+
+vim.keymap.set("n", "<leader>lb", function()
+  local golang = lint.linters.golangcilint
+  local args = golang.args
+  local final_args = {}
+  for _, v in ipairs(args) do
+    if type(v) == "function" then
+      table.insert(final_args, v())
+    else
+      table.insert(final_args, v)
+    end
+  end
+
+  print("nvim-lint would run:")
+  print("golangci-lint " .. table.concat(final_args, " "))
+  lint.try_lint()
+end, { desc = "Trigger linting (with debug)" })
+
+-- Info command
 vim.api.nvim_create_user_command("LintInfo", function()
   local filetype = vim.bo.filetype
   local linters = lint.linters_by_ft[filetype]
