@@ -25,11 +25,13 @@ function M.sort_functions()
     return
   end
   
-  -- Query for Go functions, methods, and types
+  -- Query for Go functions, methods, types, and variable declarations
   local query_str = [[
     (function_declaration) @func
     (method_declaration) @method
     (type_declaration) @type
+    (var_declaration) @var
+    (const_declaration) @const
   ]]
   
   local query = ts.query.parse(lang, query_str)
@@ -83,6 +85,9 @@ function M.sort_functions()
       name = item_line:match("func%s+([%w_]+)")
     elseif capture_name == "type" then
       name = item_line:match("type%s+([%w_]+)")
+    elseif capture_name == "var" or capture_name == "const" then
+      -- Extract first variable/const name from declaration
+      name = item_line:match("var%s+([%w_]+)") or item_line:match("const%s+([%w_]+)")
     end
     
     if name then
@@ -105,15 +110,52 @@ function M.sort_functions()
     return
   end
   
-  -- Separate exported and unexported items
+  -- Group consecutive variables/consts together
+  local var_groups = {}
+  local current_group = nil
+  
+  table.sort(items, function(a, b) return a.start_row < b.start_row end)
+  
+  for _, item in ipairs(items) do
+    if item.capture_type == "var" or item.capture_type == "const" then
+      if not current_group then
+        current_group = {items = {item}, start_row = item.start_row, end_row = item.end_row}
+        table.insert(var_groups, current_group)
+      else
+        -- Check if this var/const is adjacent to the previous one (within 1 line)
+        if item.start_row - current_group.end_row <= 2 then
+          table.insert(current_group.items, item)
+          current_group.end_row = item.end_row
+        else
+          current_group = {items = {item}, start_row = item.start_row, end_row = item.end_row}
+          table.insert(var_groups, current_group)
+        end
+      end
+    else
+      current_group = nil
+    end
+  end
+  
+  -- Sort variables within each group alphabetically
+  for _, group in ipairs(var_groups) do
+    if #group.items > 1 then
+      table.sort(group.items, function(a, b)
+        return a.name:lower() < b.name:lower()
+      end)
+    end
+  end
+  
+  -- Separate exported and unexported items (excluding vars/consts for now)
   local exported_items = {}
   local unexported_items = {}
   
   for _, item in ipairs(items) do
-    if item.is_exported then
-      table.insert(exported_items, item)
-    else
-      table.insert(unexported_items, item)
+    if item.capture_type ~= "var" and item.capture_type ~= "const" then
+      if item.is_exported then
+        table.insert(exported_items, item)
+      else
+        table.insert(unexported_items, item)
+      end
     end
   end
   
@@ -184,6 +226,110 @@ function M.sort_functions()
   end
   
   -- Replace items in buffer
+  -- First handle variable groups (sort them in place)
+  for _, group in ipairs(var_groups) do
+    if #group.items > 1 then
+      -- Delete the entire group
+      vim.api.nvim_buf_set_lines(bufnr, group.start_row, group.end_row + 1, false, {})
+      
+      -- Insert sorted variables
+      local insert_pos = group.start_row
+      for i, item in ipairs(group.items) do
+        local lines = vim.split(item.text, "\n")
+        vim.api.nvim_buf_set_lines(bufnr, insert_pos, insert_pos, false, lines)
+        insert_pos = insert_pos + #lines
+      end
+    end
+  end
+  
+  -- Re-parse to get updated positions after variable sorting
+  tree = parser:parse()[1]
+  root = tree:root()
+  items = {}
+  
+  for id, node in query:iter_captures(root, bufnr, 0, -1) do
+    local capture_name = query.captures[id]
+    
+    -- Skip vars and consts since we already sorted them
+    if capture_name == "var" or capture_name == "const" then
+      goto continue
+    end
+    
+    local start_row, start_col, end_row, end_col = node:range()
+    
+    local comment_start = start_row
+    local check_row = start_row - 1
+    
+    while check_row >= 0 do
+      local line = vim.api.nvim_buf_get_lines(bufnr, check_row, check_row + 1, false)[1]
+      if line and line:match("^%s*//") then
+        comment_start = check_row
+        check_row = check_row - 1
+      elseif line and line:match("^%s*$") then
+        check_row = check_row - 1
+      else
+        break
+      end
+    end
+    
+    local lines = vim.api.nvim_buf_get_lines(bufnr, comment_start, end_row + 1, false)
+    local text = table.concat(lines, "\n")
+    
+    local item_line = vim.api.nvim_buf_get_lines(bufnr, start_row, start_row + 1, false)[1]
+    local name
+    
+    if capture_name == "method" then
+      name = item_line:match("func%s+%([^)]+%)%s+([%w_]+)")
+    elseif capture_name == "func" then
+      name = item_line:match("func%s+([%w_]+)")
+    elseif capture_name == "type" then
+      name = item_line:match("type%s+([%w_]+)")
+    end
+    
+    if name then
+      table.insert(items, {
+        name = name,
+        text = text,
+        start_row = comment_start,
+        end_row = end_row,
+        capture_type = capture_name,
+        is_exported = is_exported(name),
+        receiver_type = capture_name == "method" and get_receiver_type(text) or nil,
+      })
+    end
+    
+    ::continue::
+  end
+  
+  if #items == 0 then
+    vim.notify("No functions or types found to sort", vim.log.levels.INFO)
+    return
+  end
+  
+  -- Now sort functions, methods, and types
+  exported_items = {}
+  unexported_items = {}
+  
+  for _, item in ipairs(items) do
+    if item.is_exported then
+      table.insert(exported_items, item)
+    else
+      table.insert(unexported_items, item)
+    end
+  end
+  
+  local sorted_exported = sort_with_type_grouping(exported_items)
+  local sorted_unexported = sort_with_type_grouping(unexported_items)
+  
+  items = {}
+  for _, item in ipairs(sorted_exported) do
+    table.insert(items, item)
+  end
+  for _, item in ipairs(sorted_unexported) do
+    table.insert(items, item)
+  end
+  
+  -- Replace items in buffer (functions, methods, types)
   -- Work backwards to maintain line numbers
   local original_items = {}
   for _, item in ipairs(items) do

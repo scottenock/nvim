@@ -1,11 +1,20 @@
 require("nvchad.configs.lspconfig").defaults()
 
-local servers = { "html", "gopls", "ts_ls", "eslint", "tailwindcss", "emmet_language_server", "cssls", "terraformls", "phpactor" }
-vim.lsp.enable(servers)
-
+local servers = {
+  "html",
+  "gopls",
+  "pyright",
+  "ts_ls",
+  "eslint",
+  "tailwindcss",
+  "emmet_language_server",
+  "cssls",
+  "terraformls",
+  "phpactor",
+}
 vim.lsp.config.gopls = {
- filetypes = {"go"},
- settings = {
+  filetypes = { "go" },
+  settings = {
     gopls = {
       gofumpt = true,
       analyses = {
@@ -20,4 +29,6 @@ vim.lsp.config.gopls = {
   },
 }
 
--- read :h vim.lsp.config for changing options of lsp servers 
+vim.lsp.enable(servers)
+
+-- read :h vim.lsp.config for changing options of lsp servers
