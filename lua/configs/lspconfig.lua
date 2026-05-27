@@ -31,4 +31,14 @@ vim.lsp.config.gopls = {
 
 vim.lsp.enable(servers)
 
+vim.api.nvim_create_user_command("EslintFixAll", function()
+  local clients = vim.lsp.get_clients({ name = "eslint", bufnr = 0 })
+  for _, client in ipairs(clients) do
+    client:request("workspace/executeCommand", {
+      command = "eslint.applyAllFixes",
+      arguments = { { uri = vim.uri_from_bufnr(0), version = vim.lsp.util.buf_versions[0] } },
+    }, nil, 0)
+  end
+end, {})
+
 -- read :h vim.lsp.config for changing options of lsp servers

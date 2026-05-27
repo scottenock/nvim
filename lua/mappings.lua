@@ -4,15 +4,13 @@ require "nvchad.mappings"
 
 local map = vim.keymap.set
 
-
 map("n", "]d", function()
-  vim.diagnostic.jump({ count = 1, float = true })
+  vim.diagnostic.jump { count = 1, float = true }
 end, { desc = "Go to next diagnostic" })
 
 map("n", "[d", function()
-  vim.diagnostic.jump({ count = -1, float = true })
+  vim.diagnostic.jump { count = -1, float = true }
 end, { desc = "Go to previous diagnostic" })
-
 
 map("n", ";", ":", { desc = "CMD enter command mode" })
 map("i", "jk", "<ESC>")
@@ -22,7 +20,7 @@ map("n", "<leader>zz", ":ClearBuffers<CR>", { noremap = true })
 map("n", "<leader>ef", ":EslintFixAll<CR>", { noremap = true })
 map("x", "<leader>p", '"_dP', { noremap = true, desc = "Paste without overwriting yank" })
 
-map("v", "<leader>s", [[:sort<CR>]], { desc = "Sort selected lines" })
+map("v", "<leader>s", [[:sort i<CR>]], { desc = "Sort selected lines" })
 -- map({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
 
 vim.api.nvim_create_user_command("FormatDisable", function(args)
@@ -76,3 +74,12 @@ map("n", "<leader>rac", ":ReplaceAllCase<CR>", { noremap = true, desc = "Replace
 vim.api.nvim_create_user_command("GoSortFuncs", function()
   require("custom.go_sort").sort_functions()
 end, {})
+
+-- Git blame (gitsigns is bundled with NvChad)
+map("n", "<leader>gb", function()
+  require("gitsigns").toggle_current_line_blame()
+end, { desc = "Toggle git blame (current line)" })
+
+map("n", "<leader>gB", function()
+  require("gitsigns").blame()
+end, { desc = "Git blame panel (full file)" })

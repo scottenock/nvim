@@ -46,6 +46,17 @@ return {
   },
 
   {
+    "lewis6991/gitsigns.nvim",
+    opts = {
+      current_line_blame_opts = {
+        delay = 300,
+        virt_text_pos = "eol",
+        current_line_blame = true,
+      },
+    },
+  },
+
+  {
     "rhysd/conflict-marker.vim",
     event = "VeryLazy", -- or choose a better event if you prefer
     config = function()
