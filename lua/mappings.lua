@@ -83,3 +83,9 @@ end, { desc = "Toggle git blame (current line)" })
 map("n", "<leader>gB", function()
   require("gitsigns").blame()
 end, { desc = "Git blame panel (full file)" })
+
+-- Notes scratchpad
+map("n", "<leader>N", function()
+  local notes = vim.fn.stdpath "config" .. "/notes.md"
+  vim.cmd("botright vsplit " .. notes)
+end, { desc = "Open notes scratchpad" })
