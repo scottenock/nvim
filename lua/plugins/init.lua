@@ -24,6 +24,8 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     opts = {
+      highlight = { enable = true },
+      auto_install = true,
       ensure_installed = {
         "vim",
         "lua",

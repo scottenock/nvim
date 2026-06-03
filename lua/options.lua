@@ -1,5 +1,7 @@
 require "nvchad.options"
 
+vim.opt.runtimepath:append(vim.fn.stdpath "data" .. "/site")
+
 -- add yours here!
 
 -- local o = vim.o

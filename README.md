@@ -1,8 +1,14 @@
-## iterm2 
+## iterm2
 
 Find "Left Option key" (and/or "Right Option key") and change it from Normal to Esc+.
 
 That makes Option+h send ESC h which Neovim reads as <A-h>, and the terminal popup will work again.
+
+## required:
+
+brew install ripgrep
+
+---
 
 **This repo is supposed to be used as config by NvChad users!**
 
@@ -12,4 +18,4 @@ That makes Option+h send ESC h which Neovim reads as <A-h>, and the terminal pop
 
 # Credits
 
-1) Lazyvim starter https://github.com/LazyVim/starter as nvchad's starter was inspired by Lazyvim's . It made a lot of things easier!
+1. Lazyvim starter https://github.com/LazyVim/starter as nvchad's starter was inspired by Lazyvim's . It made a lot of things easier!
