@@ -51,23 +51,27 @@ return {
     opts = {
       ensure_installed = {
         -- LSPs
-        "html-lsp",
-        "gopls",
-        "pyright",
-        "typescript-language-server",
-        "eslint-lsp",
-        "tailwindcss-language-server",
-        "emmet-language-server",
         "css-lsp",
+        "emmet-language-server",
+        "eslint-lsp",
+        "gopls",
+        "html-lsp",
+        "lua-language-server",
+        "marksman",
+        "pyright",
+        "tailwindcss-language-server",
         "terraform-ls",
-        "phpactor",
+        "typescript-language-server",
         -- Formatters
-        "stylua",
         "gofumpt",
+        "goimports-reviser",
+        "golines",
         "prettier",
+        "stylua",
         -- Linters
+        "golangci-lint",
+        "markdownlint",
         "tflint",
-        -- Note: golangci-lint is not a Mason package, install via brew/go
       },
       auto_update = false,
       run_on_start = true,
