@@ -46,6 +46,35 @@ return {
   },
 
   {
+    "WhoIsSethDaniel/mason-tool-installer.nvim",
+    dependencies = { "williamboman/mason.nvim" },
+    opts = {
+      ensure_installed = {
+        -- LSPs
+        "html-lsp",
+        "gopls",
+        "pyright",
+        "typescript-language-server",
+        "eslint-lsp",
+        "tailwindcss-language-server",
+        "emmet-language-server",
+        "css-lsp",
+        "terraform-ls",
+        "phpactor",
+        -- Formatters
+        "stylua",
+        "gofumpt",
+        "prettier",
+        -- Linters
+        "tflint",
+        -- Note: golangci-lint is not a Mason package, install via brew/go
+      },
+      auto_update = false,
+      run_on_start = true,
+    },
+  },
+
+  {
     "lewis6991/gitsigns.nvim",
     opts = {
       current_line_blame_opts = {
