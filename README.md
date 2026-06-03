@@ -1,3 +1,9 @@
+## iterm2 
+
+Find "Left Option key" (and/or "Right Option key") and change it from Normal to Esc+.
+
+That makes Option+h send ESC h which Neovim reads as <A-h>, and the terminal popup will work again.
+
 **This repo is supposed to be used as config by NvChad users!**
 
 - The main nvchad repo (NvChad/NvChad) is used as a plugin by this repo.
